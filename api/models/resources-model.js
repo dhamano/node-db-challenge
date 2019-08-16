@@ -6,7 +6,9 @@ const db = knex(config.development);
 module.exports = {
   find,
   findById,
-  add
+  add,
+  update,
+  remove
 }
 
 function find() {
@@ -19,4 +21,12 @@ function findById(id) {
 
 function add(resourcesInfo) {
   return db('resources').insert({ ...resourcesInfo });
+}
+
+function update(resourceInfo, id) {
+  return db('resources').where({ id }).update({ ...resourceInfo });
+}
+
+function remove(id) {
+  return db('resources').where({ id }).del();
 }
