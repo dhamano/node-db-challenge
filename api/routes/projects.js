@@ -14,7 +14,39 @@ router.get('/', async (req, res) => {
     }
   }
   catch(err) {
-    res.status(500).json({ error: 'Failed to get projects' })
+    res.status(500).json({ error: 'Failed to get projects' });
+  }
+});
+
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  try{
+    const projects = await Projects.findById(id);
+    if(projects.length > 0) {
+      const projectsWithBool = changeToBool(projects);
+      res.status(200).json(projectsWithBool[0]);
+    } else {
+      res.status(404).json({ message: 'There are currently no projects' });
+    }
+  }
+  catch(err) {
+    res.status(500).json({ error: 'Failed to get projects' });
+  }
+})
+
+router.get('/:id/tasks', async (req, res) => {
+  const { id } = req.params;
+  try{
+    const tasks = await Projects.findTasks(id);
+    if(tasks.length > 0) {
+      const tasksWithBool = changeToBool(tasks);
+      res.status(200).json(tasksWithBool);
+    } else {
+      res.status(404).json({ message: 'There are currently no tasks' });
+    }
+  }
+  catch(err) {
+    res.status(500).json({ error: 'Failed to get tasks' })
   }
 });
 
@@ -26,9 +58,41 @@ router.post('/', checkProjectSubmit, async (req, res) => {
     res.status(200).json(projectInfo);
   }
   catch(err) {
-    res.status(500).json({ error: 'Failed to post project to server' })
+    res.status(500).json({ error: 'Failed to post project to server' });
   }
 });
+
+router.put('/:id', checkProjectSubmit, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const project = await Projects.update(req.body, id);
+    if(project) {
+      let projectInfo = await Projects.findById(id);
+      projectInfo = changeToBool(projectInfo);
+      res.status(200).json(projectInfo[0]);
+    } else {
+      res.status(404).json({ error: `Project with id ${id} does not exits` });
+    }
+  }
+  catch(err) {
+    res.status(500).json({ error: 'Failed to update project to server' });
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const isDeleted = await Projects.remove(id);
+    if(isDeleted) {
+      res.status(210).json();
+    } else {
+      res.status(404).json({ error: `The project with id ${id} does not exist and cannot be deleted` })
+    }
+  }
+  catch(err) {
+    res.status(500).json({ error: 'Failed to delete project to server' });
+  }
+})
 
 function checkProjectSubmit(req, res, next) {
   const { project_name } = req.body;

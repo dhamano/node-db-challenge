@@ -18,6 +18,5 @@ function findById(id) {
 }
 
 function add(resourcesInfo) {
-  console.log(resourcesInfo);
   return db('resources').insert({ ...resourcesInfo });
 }
